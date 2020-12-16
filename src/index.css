@@ -1,0 +1,58 @@
+
+body {
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  color: #a4aeb0;
+  font-family: 'Courier New', Courier, monospace;
+}
+
+#menu {
+  background-color: #48556a;
+}
+
+#inspector {
+  background-color: #323944;
+}
+
+#renderer {
+  border: none;
+  background-color: #19191a;
+}
+
+#treeview {
+  background-color: #323944;
+}
+
+#treeview > .treeview-node:nth-child(2n+1) {
+  background-color:#0001;
+}
+
+.treeview-node {
+  margin-top:0.1em;
+  cursor: pointer;
+}
+
+/**Just .treeview-node:hover alone has low specificity
+ * and is overriden by treeview > .treeview-node:nth-child
+ * adding #treeview to the beginning here raises the level
+ * and because this is after the nth child one, it takes precedence
+**/
+#treeview > .treeview-node:hover {
+  background-color:#0005;
+}
+
+#treeview > .treeview-node-selected {
+  background-color:#000f !important;
+  color: white;
+}
+
+.treeview-node-type {
+  color: #c088f9;
+}
+
+.treeview-node-id {
+  color: #76808e;
+}
