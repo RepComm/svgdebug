@@ -9,12 +9,18 @@ body {
   font-family: 'Courier New', Courier, monospace;
 }
 
+#editor {
+  /**TODO - Temp fix, make inspector solve this*/
+  background-color:#323944;
+}
+
 #menu {
   background-color: #48556a;
 }
 
 #inspector {
-  background-color: #323944;
+  flex-direction: column;
+  height: min-content;
 }
 
 #renderer {
@@ -61,23 +67,32 @@ body {
   margin: 0.5em;
   border-radius: 0.25em;
   background-color: #0002;
-  max-height: 2em;
+  flex-direction: column;
 }
 
 .inspector-field-label {
   align-self: center;
-  text-indent: 1em;
 }
 
 .inspector-field-input {
   flex: 1;
   min-width:0;
   min-height: 0;
-  width: 100%;
+  width: 99%;
   border: none;
-  border-radius: 0.25em;
+  /* border-radius: 0.25em; */
   background-color: #0003;
-  margin-left:1em;
+  /* margin-left:1em; */
   color: inherit;
   text-indent: 1em;
+}
+.inspector-field-input:disabled {
+  background: none !important;
+}
+
+.inspector-field-enable {
+  background-color: #516c77;
+  border-radius: 0.25em;
+  color: inherit;
+  max-height: 1.5em;
 }

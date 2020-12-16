@@ -35,6 +35,6 @@
     ]
   },
   "dependencies": {
-    "@repcomm/exponent-ts": "^1.1.2"
+    "@repcomm/exponent-ts": "^1.1.3"
   }
 }

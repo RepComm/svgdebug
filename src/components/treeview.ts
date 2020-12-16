@@ -40,6 +40,7 @@ export class TreeViewNode extends Panel {
     this.nodeId = name;
     if (name) {
       this.idLabel.setTextContent(`id: ${name}`);
+      this.idLabel.mount(this);
     } else {
       this.idLabel.unmount();
     }
@@ -90,7 +91,7 @@ export class TreeView extends Panel {
   }
   setContent (content: XMLDocument): this {
     this.content = content;
-
+    this.removeChildren();
     this.build(this.content.firstChild as SVGElement);
 
     for (let first of this.viewNodes) {
@@ -118,6 +119,23 @@ export class TreeView extends Panel {
   }
   onSelectionChange (cb: TreeViewSelectionChangeCallback): this {
     this.selectionChangeListeners.add(cb);
+    return this;
+  }
+  getViewNodeByElement (element: SVGElement): TreeViewNode {
+    for (let viewNode of this.viewNodes) {
+      if (viewNode.getNode() === element) return viewNode;
+    }
+    return undefined;
+  }
+  onNodeElementChange (element: SVGElement): this {
+    if (this.selected.getNode() == element) {
+      this.selected.setElement(element);
+    } else {
+      let viewNode = this.getViewNodeByElement(element);
+      if (viewNode) {
+        viewNode.setElement(element);
+      }
+    }
     return this;
   }
 }

@@ -24,6 +24,10 @@ export class Editor extends Grid {
     this.setCell(this.menu, 1, 1, 4, 1);
 
     this.inspector = new Inspector().setId("inspector");
+    this.inspector.onContentChange((element, attrname)=>{
+      this.onContentModified();
+      this.treeview.onNodeElementChange (element);
+    });
     this.setCell(this.inspector, 1, 2);
 
     this.renderer = new Exponent()
@@ -42,11 +46,15 @@ export class Editor extends Grid {
     });
   }
 
+  private onContentModified () {
+    let serializer = new XMLSerializer();
+    (this.renderer.element as HTMLIFrameElement).srcdoc = serializer.serializeToString(this.content);
+  }
+
   private onContentChange () {
     //this will also tree selection change to root, hence trigger inspector refresh
     this.treeview.setContent(this.content);
-    let serializer = new XMLSerializer();
-    (this.renderer.element as HTMLIFrameElement).srcdoc = serializer.serializeToString(this.content);
+    this.onContentModified();
   }
 
   setContent (content: XMLDocument): this {

@@ -1,61 +1,112 @@
 
-import { Component, Panel } from "@repcomm/exponent-ts";
+import { Panel } from "@repcomm/exponent-ts";
+import { gGetCenterOfDensity, pathGetCenterOfDensity } from "../svgutils";
+import { InspectorField } from "./inspector/field";
 
-export type InspectFieldType = "number" | "string";
+export type SVGNodeTypeStrings = "svg"|"defs"|"metadata"|"g"|"path";
 
-export class InspectorField extends Panel {
-  private label: Component;
-  private input: Component;
-
-  constructor () {
-    super();
-    this.addClasses("inspector-field");
-    this.label = new Component()
-    .make("span")
-    .addClasses("inspector-field-label")
-    .mount(this);
-
-    this.input = new Component()
-    .make("input")
-    .addClasses("inspector-field-input")
-    .mount(this);
-  }
-  setLabel (name: string): this {
-    this.label.setTextContent(name);
-    return this;
-  }
-  setType(type: InspectFieldType): this {
-    if (type == "number") {
-      this.input.setAttr("type", "number");
-    } else if (type == "string") {
-      this.input.setAttr("type", "string");
-    }
-    return this;
-  }
-  setValue (v: any): this {
-    this.input.setAttr("value", v);
-    return this;
-  }
-  getValue (): any {
-    return this.input.getAttr("value");
-  }
+export interface InspectorFieldChangeCallback {
+  (element: SVGElement, attrname: string): void;
 }
 
 export class Inspector extends Panel {
   private content: SVGElement;
 
-  private idField: InspectorField;
+  private fields: Array<InspectorField>;
+  private fieldChangeCallbacks: Set<InspectorFieldChangeCallback>;
 
   constructor () {
     super();
-    this.idField = new InspectorField()
-    .setLabel("id")
-    .mount(this);
+    this.fieldChangeCallbacks = new Set();
+  }
+  onContentChange (cb: InspectorFieldChangeCallback): this {
+    this.fieldChangeCallbacks.add(cb);
+    return this;
   }
   setContent (content: SVGElement): this {
     this.content = content;
-    
-    this.idField.setValue(this.content.id);
+
+    this.removeChildren();
+
+    if (content.id) {
+      let to: number = -1;
+      let idField = new InspectorField()
+      .setLabel("id")
+      .setValue(content.id)
+      .mount(this).on("keyup", ()=>{
+        if (to) clearTimeout(to);
+        to = setTimeout(()=>{
+          console.log("Changing id");
+          content.setAttribute("id", idField.getValue());
+          for (let cb of this.fieldChangeCallbacks) {
+            cb(content, "id");
+          }
+          to = -1;
+        }, 350);
+      });
+    }
+
+    if (content.hasAttribute("transform")) {
+      let transformField = new InspectorField()
+      .setLabel("transform")
+      .setValue(content.getAttribute("transform"))
+      .mount(this);
+    }
+
+    if (content.hasAttribute("width")) {
+      let widthField = new InspectorField()
+      .setLabel("width")
+      .setValue(content.getAttribute("width"))
+      .mount(this);
+    }
+    if (content.hasAttribute("height")) {
+      let heightField = new InspectorField()
+      .setLabel("height")
+      .setValue(content.getAttribute("height"))
+      .mount(this);
+    }
+    if (content.hasAttribute("shape-rendering")) {
+      let shapeRenderingField = new InspectorField()
+      .setLabel("shape-rendering")
+      .setValue(content.getAttribute("shape-rendering"))
+      .mount(this);
+    }
+
+    let type: SVGNodeTypeStrings = (content.nodeName as SVGNodeTypeStrings);
+    if (type == "path") {
+      let dField = new InspectorField()
+      .setLabel("d")
+      .setValue(content.getAttribute("d"))
+      .mount(this);
+
+      let avg = pathGetCenterOfDensity(content as SVGPathElement);
+      console.log("average path point", avg);
+      // content.setAttribute("transform", `translate(${-avg[0]} ${-avg[1]})`);
+      // for (let cb of this.fieldChangeCallbacks) {
+      //   cb(content, "style");
+      // }
+
+      let to = -1;
+      let styleField = new InspectorField()
+      .setLabel("style")
+      .setValue(content.getAttribute("style"))
+      .mount(this)
+      .on("keyup", ()=>{
+        if (to) clearTimeout(to);
+        to = setTimeout(()=>{
+          console.log("Changing document");
+          content.setAttribute("style", styleField.getValue());
+          for (let cb of this.fieldChangeCallbacks) {
+            cb(content, "style");
+          }
+          to = -1;
+        }, 350);
+      });
+
+    } else if (type == "g") {
+      let avg = gGetCenterOfDensity(content as SVGPathElement);
+      console.log("average group point", avg);
+    }
 
     return this;
   }
