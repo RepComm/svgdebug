@@ -56,3 +56,28 @@ body {
 .treeview-node-id {
   color: #76808e;
 }
+
+.inspector-field {
+  margin: 0.5em;
+  border-radius: 0.25em;
+  background-color: #0002;
+  max-height: 2em;
+}
+
+.inspector-field-label {
+  align-self: center;
+  text-indent: 1em;
+}
+
+.inspector-field-input {
+  flex: 1;
+  min-width:0;
+  min-height: 0;
+  width: 100%;
+  border: none;
+  border-radius: 0.25em;
+  background-color: #0003;
+  margin-left:1em;
+  color: inherit;
+  text-indent: 1em;
+}

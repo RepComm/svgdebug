@@ -45,6 +45,8 @@ export class Editor extends Grid {
   private onContentChange () {
     //this will also tree selection change to root, hence trigger inspector refresh
     this.treeview.setContent(this.content);
+    let serializer = new XMLSerializer();
+    (this.renderer.element as HTMLIFrameElement).srcdoc = serializer.serializeToString(this.content);
   }
 
   setContent (content: XMLDocument): this {
