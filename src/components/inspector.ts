@@ -1,6 +1,6 @@
 
 import { Panel } from "@repcomm/exponent-ts";
-import { gGetCenterOfDensity, pathGetCenterOfDensity } from "../svgutils";
+import { PathHelper } from "../svgutils";
 import { InspectorField } from "./inspector/field";
 
 export type SVGNodeTypeStrings = "svg"|"defs"|"metadata"|"g"|"path";
@@ -79,7 +79,9 @@ export class Inspector extends Panel {
       .setValue(content.getAttribute("d"))
       .mount(this);
 
-      let avg = pathGetCenterOfDensity(content as SVGPathElement);
+      let helper = PathHelper.from(content.getAttribute("d"));
+      let avg = helper.averagePoint();
+      
       console.log("average path point", avg);
       // content.setAttribute("transform", `translate(${-avg[0]} ${-avg[1]})`);
       // for (let cb of this.fieldChangeCallbacks) {
@@ -102,10 +104,6 @@ export class Inspector extends Panel {
           to = -1;
         }, 350);
       });
-
-    } else if (type == "g") {
-      let avg = gGetCenterOfDensity(content as SVGPathElement);
-      console.log("average group point", avg);
     }
 
     return this;

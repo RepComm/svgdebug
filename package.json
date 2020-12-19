@@ -35,6 +35,7 @@
     ]
   },
   "dependencies": {
-    "@repcomm/exponent-ts": "^1.1.3"
+    "@repcomm/exponent-ts": "^1.1.3",
+    "@repcomm/scenario2d": "^1.0.19"
   }
 }
