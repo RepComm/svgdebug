@@ -20,7 +20,8 @@ body {
 
 #inspector {
   flex-direction: column;
-  height: min-content;
+  /* height: min-content; */
+  overflow-y: auto;
 }
 
 #renderer {
@@ -39,6 +40,7 @@ body {
 .treeview-node {
   margin-top:0.1em;
   cursor: pointer;
+  transition: background-color 1s cubic-bezier(0.08, 0.82, 0.17, 1);
 }
 
 /**Just .treeview-node:hover alone has low specificity
@@ -95,4 +97,35 @@ body {
   border-radius: 0.25em;
   color: inherit;
   max-height: 1.5em;
+  /**Temporarily disabled*/
+  display: none;
+}
+
+.inspector-editor {
+  background-color: #00000060;
+  flex-direction: column;
+  margin: 0.5em 0.5em 0.5em 0.5em;
+  max-height: min-content;
+  border: #e8e8e88f dashed 1px;
+  border-radius: 0.5em;
+}
+
+.inspector-editor-title {
+  background-color: #00000060;
+  text-align: center;
+  padding-top:0.5em;
+  padding-bottom:0.5em;
+  cursor: pointer;
+  max-height: min-content;
+  flex:0.1 !important;
+  font-size: large;
+}
+
+.inspector-editor-folder {
+  flex-direction: column;
+  overflow-y: hidden;
+}
+
+.inspector-editor-folder-minimized {
+  display: none !important;
 }

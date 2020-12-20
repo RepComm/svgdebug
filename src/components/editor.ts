@@ -5,15 +5,18 @@ import { Inspector } from "./inspector";
 import { TreeView } from "./treeview";
 import { Menu } from "./menu";
 
-export class Editor extends Grid {
+import { ContentInterop } from "./contentinterop";
+
+export class Editor extends Grid implements ContentInterop {
+  private content: SVGElement;
   private menu: Menu;
   private inspector: Inspector;
   private treeview: TreeView;
   private renderer: Exponent;
 
-  private content: XMLDocument;
+  private document: XMLDocument;
 
-  constructor () {
+  constructor() {
     super();
     this.setStyleItem("grid-template-rows", "minmax(0, 1fr) minmax(0, 15fr)");
     // this.setRowCount(2);
@@ -23,43 +26,57 @@ export class Editor extends Grid {
     this.menu = new Menu().setId("menu");
     this.setCell(this.menu, 1, 1, 4, 1);
 
-    this.inspector = new Inspector().setId("inspector");
-    this.inspector.onContentChange((element, attrname)=>{
-      this.onContentModified();
-      this.treeview.onNodeElementChange (element);
-    });
+    this.inspector = new Inspector(this).setId("inspector");
     this.setCell(this.inspector, 1, 2);
 
     this.renderer = new Exponent()
-    .make("iframe")
-    .addClasses("exponent-panel")
-    .setStyleItem("width", "100%")
-    .setStyleItem("height", "100%")
-    .setId("renderer");
+      .make("iframe")
+      .addClasses("exponent-panel")
+      .setStyleItem("width", "100%")
+      .setStyleItem("height", "100%")
+      .setId("renderer");
     this.setCell(this.renderer, 2, 2);
 
-    this.treeview = new TreeView().setId("treeview");
+    this.treeview = new TreeView(this).setId("treeview");
     this.setCell(this.treeview, 3, 2);
-
-    this.treeview.onSelectionChange((current, old)=>{
-      this.inspector.setContent(current);
-    });
   }
-
-  private onContentModified () {
-    let serializer = new XMLSerializer();
-    (this.renderer.element as HTMLIFrameElement).srcdoc = serializer.serializeToString(this.content);
-  }
-
-  private onContentChange () {
-    //this will also tree selection change to root, hence trigger inspector refresh
-    this.treeview.setContent(this.content);
-    this.onContentModified();
-  }
-
-  setContent (content: XMLDocument): this {
+  setContent(content: SVGElement): this {
     this.content = content;
-    this.onContentChange();
+    this.onContentSwitch();
+    return this;
+  }
+  getContent(): SVGElement {
+    return this.content;
+  }
+  onContentSwitch(): this {
+    this.inspector.setContent(this.content);
+    return this;
+  }
+  notifyContentModified(modifier: any, content: SVGElement): this {
+    this.onContentModified(modifier, content);
+    return this;
+  }
+  onContentModified(modifier: any, content: SVGElement): this {
+    this.treeview.notifyContentModified(modifier, content);
+
+    let serializer = new XMLSerializer();
+    //TODO - implement canvas renderer redraw here
+    (this.renderer.element as HTMLIFrameElement).srcdoc = serializer.serializeToString(this.document);
+
+    return this;
+  }
+
+  /**Sets the document
+   * @param document 
+   */
+  setDocument(document: XMLDocument): this {
+    this.document = document;
+    this.treeview.setDocument(this.document);
+
+    let serializer = new XMLSerializer();
+    //TODO - implement canvas renderer redraw here
+    (this.renderer.element as HTMLIFrameElement).srcdoc = serializer.serializeToString(this.document);
+
     return this;
   }
 }

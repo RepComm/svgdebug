@@ -44,7 +44,7 @@ function loadSVG (url: string): Promise<XMLDocument> {
 async function init () {
   let doc = await loadSVG("./res/penguin.svg");
   console.log(doc);
-  editor.setContent(doc);
+  editor.setDocument(doc);
 }
 
 init();

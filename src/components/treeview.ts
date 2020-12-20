@@ -1,8 +1,6 @@
 import { Component, Panel } from "@repcomm/exponent-ts";
-
-export interface TreeViewSelectionChangeCallback {
-  (current: SVGElement, old: SVGElement): void;
-}
+import { ContentInterop } from "./contentinterop";
+import { Editor } from "./editor";
 
 export class TreeViewNode extends Panel {
   private nodeId: string;
@@ -54,18 +52,18 @@ export class TreeViewNode extends Panel {
   }
 }
 
-export class TreeView extends Panel {
-  private content: XMLDocument;
-  private selectionChangeListeners: Set<TreeViewSelectionChangeCallback>;
+export class TreeView extends Panel implements ContentInterop {
+  private editor: Editor;
+  private document: XMLDocument;
   private previousSelected: TreeViewNode;
   private selected: TreeViewNode;
   private viewNodes: Set<TreeViewNode>;
 
-  constructor () {
+  constructor (editor: Editor) {
     super();
+    this.editor = editor;
     this.setStyleItem("flex-direction", "column");
     this.setStyleItem("overflow", "scroll");
-    this.selectionChangeListeners = new Set();
     this.viewNodes = new Set();
   }
   select (node: TreeViewNode): this {
@@ -79,20 +77,13 @@ export class TreeView extends Panel {
       this.selected.addClasses("treeview-node-selected");
     }
 
-    for (let cb of this.selectionChangeListeners) {
-      let current;
-      if (this.selected) current = this.selected.getNode();
-      let previous;
-      if (this.previousSelected) previous = this.previousSelected.getNode();
-      
-      cb(current, previous);
-    }
+    this.editor.setContent(this.selected.getNode());
     return this;
   }
-  setContent (content: XMLDocument): this {
-    this.content = content;
+  setDocument (document: XMLDocument): this {
+    this.document = document;
     this.removeChildren();
-    this.build(this.content.firstChild as SVGElement);
+    this.build(this.document.firstChild as SVGElement);
 
     for (let first of this.viewNodes) {
       this.select(first);
@@ -115,11 +106,7 @@ export class TreeView extends Panel {
     }
   }
   getRootSVG (): SVGElement {
-    return (this.content.getRootNode() as SVGElement);
-  }
-  onSelectionChange (cb: TreeViewSelectionChangeCallback): this {
-    this.selectionChangeListeners.add(cb);
-    return this;
+    return (this.document.getRootNode() as SVGElement);
   }
   getViewNodeByElement (element: SVGElement): TreeViewNode {
     for (let viewNode of this.viewNodes) {
@@ -127,7 +114,11 @@ export class TreeView extends Panel {
     }
     return undefined;
   }
-  onNodeElementChange (element: SVGElement): this {
+  notifyContentModified (modifier: any, content: SVGElement): this {
+    this.onContentModified(modifier, content);
+    return this;
+  }
+  onContentModified (modifier: any, element: SVGElement): this {
     if (this.selected.getNode() == element) {
       this.selected.setElement(element);
     } else {

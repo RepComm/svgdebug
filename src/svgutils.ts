@@ -1,6 +1,15 @@
-import { Vec2 } from "@repcomm/scenario2d";
+import { Transform2d, Vec2 } from "@repcomm/scenario2d";
 
 export const SVGPathDCommands = "MLQTCSAZVH";
+
+export interface PathRect {
+  top: number;
+  left: number;
+  bottom: number;
+  right: number;
+  width: number;
+  height: number;
+}
 
 /**A single command in a set of svg path d commands
  * also contains the points that make it up
@@ -143,6 +152,44 @@ export class PathHelper {
    */
   averagePoint(): Vec2 {
     return new Vec2().centerOf(...this.getPoints());
+  }
+  getRect (): PathRect {
+    let points: Array<Vec2>;
+    let result = {
+      top: -Infinity,
+      left: -Infinity,
+      bottom: Infinity,
+      right: Infinity,
+      width: Infinity,
+      height: Infinity
+    };
+    for (let c of this.commands) {
+      points = c.getPoints();
+      //TODO - handle non-straight lines
+      for (let p of points) {
+        if (p.x < result.right) result.right = p.x;
+        if (p.x > result.left) result.left = p.x;
+        if (p.y > result.top) result.top = p.y;
+        if (p.y < result.bottom) result.top = p.y;
+      }
+    }
+    return result;
+  }
+  applyTransform (t: Transform2d): this {
+    let ctrls = this.getPoints();
+
+    let sinR = Math.sin(t.rotation);
+    let cosR = Math.cos(t.rotation);
+
+    for (let p of ctrls) {
+      p.mulScalar(t.scale);
+      p.set(
+        p.x * cosR - p.y * sinR,
+        p.y * cosR + p.x * sinR
+      );
+      p.add (t.position);
+    }
+    return this;
   }
   /**Removes all the commands, start fresh
    */

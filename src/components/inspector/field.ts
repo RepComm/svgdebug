@@ -1,15 +1,23 @@
 
 import { Panel, Component, Button } from "@repcomm/exponent-ts";
+import { ContentInterop } from "../contentinterop";
+import { InspectorEditor } from "./editor";
 
 export type InspectFieldType = "number" | "string";
 
-export class InspectorField extends Panel {
+export class InspectorField extends Panel implements ContentInterop {
+  private content: SVGElement;
+
+  private editor: InspectorEditor;
   private label: Component;
   private input: Component;
   private enableButton: Button;
 
-  constructor () {
+  constructor (editor: InspectorEditor) {
     super();
+    this.editor = editor;
+    if (!this.editor) throw `Editor argument cannot be null or undefined, was ${editor}`;
+
     this.addClasses("inspector-field");
     this.label = new Component()
     .make("span")
@@ -28,6 +36,23 @@ export class InspectorField extends Panel {
     .on("click", ()=>{
       this.setEnabled(!this.enabled);
     });
+  }
+  notifyContentModified(modifier: any, content: SVGElement): this {
+    throw new Error("Method not implemented.");
+  }
+  onContentModified(modifier: any, content: SVGElement): this {
+    throw new Error("Method not implemented.");
+  }
+  setContent(content: SVGElement): this {
+    this.content = content;
+    this.onContentSwitch();
+    return this;
+  }
+  getContent(): SVGElement {
+    return this.content;
+  }
+  onContentSwitch(): this {
+    throw new Error("Method not implemented.");
   }
   setLabel (name: string): this {
     this.label.setTextContent(name);
@@ -48,7 +73,6 @@ export class InspectorField extends Panel {
   getValue (): any {
     return this.input.getAttr("value");
   }
-  
   onEnable() {
     if (this.getEnabled()) {
       this.enableButton?.setTextContent("-");
