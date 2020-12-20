@@ -1,34 +1,68 @@
 
 import { Transform2d } from "@repcomm/scenario2d";
 import { Inspector } from "../inspector";
+import { EditorAction } from "./action";
 import { InspectorEditor } from "./editor";
-import { InspectorField } from "./field";
+import { EditorField } from "./field";
+
+import { PathHelper } from "../../svgutils";
 
 export class TransformEditor extends InspectorEditor {
   private transform: Transform2d;
+
+  private fieldX: EditorField;
+  private fieldY: EditorField;
+  private fieldR: EditorField;
+  private fieldS: EditorField;
+  private btnBake: EditorAction;
 
   constructor (inspector: Inspector) {
     super(inspector);
     this.setTitle("transform");
     this.transform = new Transform2d();
 
-    let fieldX = new InspectorField(this).setLabel("x").setValue(0);
-    this.addField(fieldX);
+    this.fieldX = new EditorField(this).setLabel("x").setValue(0);
+    this.addItem(this.fieldX);
 
-    let fieldY = new InspectorField(this).setLabel("y").setValue(0);
-    this.addField(fieldY);
+    this.fieldY = new EditorField(this).setLabel("y").setValue(0);
+    this.addItem(this.fieldY);
 
-    let fieldR = new InspectorField(this).setLabel("rotation").setValue(0);
-    this.addField(fieldR);
+    this.fieldR = new EditorField(this).setLabel("rotation").setValue(0);
+    this.addItem(this.fieldR);
 
-    let fieldS = new InspectorField(this).setLabel("scale").setValue(0);
-    this.addField(fieldS);
+    this.fieldS = new EditorField(this).setLabel("scale").setValue(1);
+    this.addItem(this.fieldS);
+
+    this.btnBake = new EditorAction(this).setLabel("Bake Transforms").listen(()=>{
+      this.transform.position.setX(
+        parseFloat(this.fieldX.getValue())
+      );
+      this.transform.position.setY(
+        parseFloat(this.fieldY.getValue())
+      );
+      this.transform.rotation = parseFloat(this.fieldR.getValue());
+      this.transform.scale = parseFloat(this.fieldS.getValue());
+
+      let dOld = this.content.getAttribute("d");
+
+      let path = PathHelper.from(this.content.getAttribute("d"));
+      path.applyTransform(this.transform);
+
+      let dNew = path.to().toLowerCase();
+
+      console.log("Old:", dOld);
+      console.log("New:", dNew);
+
+      this.content.setAttribute("d", dNew);
+
+      this.transform.position.set(0, 0);
+      this.transform.rotation = 0;
+      this.transform.scale = 1;
+      this.notifyContentModified(this, this.content);
+    });
+    this.addItem(this.btnBake);
 
     this.build();
-  }
-  setContent(content: SVGElement): this {
-    this.onSwitchContent();
-    return this;
   }
   onSwitchContent (): this {
     return this;

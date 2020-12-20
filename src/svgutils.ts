@@ -183,10 +183,11 @@ export class PathHelper {
 
     for (let p of ctrls) {
       p.mulScalar(t.scale);
-      p.set(
-        p.x * cosR - p.y * sinR,
-        p.y * cosR + p.x * sinR
-      );
+      
+      // p.set(
+      //   p.x * cosR - p.y * sinR,
+      //   p.y * cosR + p.x * sinR
+      // );
       p.add (t.position);
     }
     return this;

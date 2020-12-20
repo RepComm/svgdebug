@@ -65,6 +65,13 @@ body {
   color: #76808e;
 }
 
+.editor-item {
+  margin: 0.5em;
+  border-radius: 0.25em;
+  background-color: #0002;
+  flex-direction: column;
+}
+
 .inspector-field {
   margin: 0.5em;
   border-radius: 0.25em;

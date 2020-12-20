@@ -2,7 +2,8 @@
 import { Exponent, Panel } from "@repcomm/exponent-ts";
 import { ContentInterop } from "../contentinterop";
 import { Inspector } from "../inspector";
-import { InspectorField } from "./field";
+import { EditorField } from "./field";
+import { EditorItem } from "./item";
 
 /**A group of configurations
  */
@@ -11,7 +12,7 @@ export class InspectorEditor extends Panel implements ContentInterop {
 
   protected content: SVGElement;
 
-  private fields: Set<InspectorField>;
+  private items: Set<EditorItem>;
 
   private minimized: boolean = false;
 
@@ -23,7 +24,7 @@ export class InspectorEditor extends Panel implements ContentInterop {
     this.addClasses("inspector-editor");
     this.inspector = inspector;
     if (!inspector) throw `Inspector argument cannot be undefined or null, was ${inspector}`;
-    this.fields = new Set();
+    this.items = new Set();
 
     this.title = new Exponent()
     .make("span")
@@ -45,22 +46,22 @@ export class InspectorEditor extends Panel implements ContentInterop {
   }
   protected build () {
     this.folder.removeChildren();
-    for (let field of this.fields) {
+    for (let field of this.items) {
       field.mount(this.folder);
     }
   }
-  addField (field: InspectorField, build: boolean = false): this {
-    this.fields.add(field);
+  addItem (item: EditorItem, build: boolean = false): this {
+    this.items.add(item);
     if (build) this.build();
     return this;
   }
-  removeField (field: InspectorField, build: boolean = false): this {
-    this.fields.delete(field);
+  removeItem (item: EditorItem, build: boolean = false): this {
+    this.items.delete(item);
     if (build) this.build();
     return this;
   }
-  hasField (field: InspectorField): boolean {
-    return this.fields.has(field);
+  hasItem (field: EditorField): boolean {
+    return this.items.has(field);
   }
   setContent (target: SVGElement): this {
     this.content = target;
@@ -68,7 +69,7 @@ export class InspectorEditor extends Panel implements ContentInterop {
     return this;
   }
   onSwitchContent () {
-    for (let field of this.fields) {
+    for (let field of this.items) {
       field.setContent(this.content);
     }
   }

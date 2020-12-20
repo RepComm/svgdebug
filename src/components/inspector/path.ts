@@ -3,17 +3,17 @@
 import { Transform2d } from "@repcomm/scenario2d";
 import { Inspector } from "../inspector";
 import { InspectorEditor } from "./editor";
-import { InspectorField } from "./field";
+import { EditorField } from "./field";
 
 export class PathEditor extends InspectorEditor {
-  private fieldD: InspectorField;
+  private fieldD: EditorField;
 
   constructor (inspector: Inspector) {
     super(inspector);
     this.setTitle("d");
 
-    this.fieldD = new InspectorField(this).setLabel("d").setValue("empty");
-    this.addField(this.fieldD);
+    this.fieldD = new EditorField(this).setLabel("d").setValue("empty");
+    this.addItem(this.fieldD);
 
     this.build();
   }

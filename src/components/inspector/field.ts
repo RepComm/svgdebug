@@ -1,23 +1,18 @@
 
-import { Panel, Component, Button } from "@repcomm/exponent-ts";
-import { ContentInterop } from "../contentinterop";
+import { Component, Button } from "@repcomm/exponent-ts";
 import { InspectorEditor } from "./editor";
+import { EditorItem } from "./item";
 
-export type InspectFieldType = "number" | "string";
+export type InspectFieldType = "number" | "string" | "button";
 
-export class InspectorField extends Panel implements ContentInterop {
-  private content: SVGElement;
-
-  private editor: InspectorEditor;
+export class EditorField extends EditorItem {
   private label: Component;
   private input: Component;
   private enableButton: Button;
 
   constructor (editor: InspectorEditor) {
-    super();
-    this.editor = editor;
-    if (!this.editor) throw `Editor argument cannot be null or undefined, was ${editor}`;
-
+    super(editor);
+    
     this.addClasses("inspector-field");
     this.label = new Component()
     .make("span")
@@ -42,14 +37,6 @@ export class InspectorField extends Panel implements ContentInterop {
   }
   onContentModified(modifier: any, content: SVGElement): this {
     throw new Error("Method not implemented.");
-  }
-  setContent(content: SVGElement): this {
-    this.content = content;
-    this.onContentSwitch();
-    return this;
-  }
-  getContent(): SVGElement {
-    return this.content;
   }
   onContentSwitch(): this {
     throw new Error("Method not implemented.");
