@@ -44,9 +44,6 @@ export class TransformEditor extends InspectorEditor {
 
       let dNew = path.to();
 
-      console.log("Old:", dOld);
-      console.log("New:", dNew);
-
       this.content.setAttribute("d", dNew);
       this.internalToDisplay();
       
@@ -58,7 +55,11 @@ export class TransformEditor extends InspectorEditor {
       let path = PathHelper.from(this.content.getAttribute("d"));
       this.transform.position.copy(path.averagePoint()).mulScalar(-1);
       
+      console.log("Old:", path.to());
+
       path.applyTransform(this.transform);
+
+      console.log("New:", path.to());
 
       this.transform.position.mulScalar(-1);
       

@@ -9,7 +9,6 @@
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    width="200pt"
    height="200pt"
-   viewBox="0 0 70.555558 70.555555"
    version="1.1"
    id="svg8"
    inkscape:version="1.0.1 (0767f8302a, 2020-10-17)"
@@ -52,10 +51,15 @@
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
      id="layer1">
-    <path
+    <!-- <path
        id="box"
        style="fill:#4fafb0;fill-opacity:0.372549;stroke:#000000;stroke-width:3.52778;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        inkscape:label="#box"
-       d="m 10.375139,35.277778 24.90264,-24.902639 24.902639,24.90264 -24.90264,24.902639 z" />
+       d="m 10.375139,35.277778 24.90264,-24.902639 24.902639,24.90264 -24.90264,24.902639 z" /> -->
+      <path
+       id="box2"
+       style="fill:#4fafb0;fill-opacity:0.372549;stroke:#000000;stroke-width:3.52778;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       inkscape:label="#box"
+       d="m 50,50 l 20,-20 20,20 m 0,0 10,10 -10,10 z" />
   </g>
 </svg>

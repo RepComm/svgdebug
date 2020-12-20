@@ -37,6 +37,18 @@ export class PathCmd {
   getPoints(): Array<Vec2> {
     return this.points;
   }
+  getPointCount(): number {
+    return this.points.length;
+  }
+  getPoint(ind: number): Vec2 {
+    return this.points[ind];
+  }
+  getFirstPoint(): Vec2 {
+    return this.points[0];
+  }
+  getLastPoint(): Vec2 {
+    return this.points[this.points.length - 1];
+  }
   toString(): string {
     let result = this.type;
     if (this.getType() == "V") {
@@ -54,8 +66,29 @@ export class PathCmd {
    * false if relative space
    * Relies on svg path d lowercase / uppercase syntax
    */
-  isAbsolute (): boolean {
-    return this.type === this.type.toLowerCase();
+  isAbsolute(): boolean {
+    return this.type !== this.type.toLowerCase();
+  }
+  /**svg path d commands generate an offset
+   * when they specify points
+   * Absolute commands generate on offset equal to their last point
+   * Relative commands generate on offset defined as:
+   * command m -> first point + last point
+   * command <other> -> not tested
+   */
+  getGeneratedOffset(): Vec2 {
+    let result = new Vec2();
+    if (this.getType() == "z" || this.getType() == "Z") return result;
+    if (this.isAbsolute()) {
+      result.copy(this.getLastPoint());
+    } else {
+      result.copy(this.getFirstPoint());
+
+      if (this.getPointCount() > 1) {
+        result.add(this.getLastPoint());
+      }
+    }
+    return result;
   }
 }
 
@@ -142,7 +175,7 @@ export class PathHelper {
   }
   /**Gets the points declared with lowercase path d commands
    */
-  getRelativePoints (clone: boolean = false): Array<Vec2> {
+  getRelativePoints(clone: boolean = false): Array<Vec2> {
     let result = new Array<Vec2>();
     for (let cmd of this.commands) {
       if (cmd.isAbsolute()) continue;
@@ -156,7 +189,7 @@ export class PathHelper {
     }
     return result;
   }
-  getAbsolutePoints (clone: boolean = false): Array<Vec2> {
+  getAbsolutePoints(clone: boolean = false): Array<Vec2> {
     let result = new Array<Vec2>();
     for (let cmd of this.commands) {
       if (!cmd.isAbsolute()) continue;
@@ -189,7 +222,7 @@ export class PathHelper {
   averagePoint(): Vec2 {
     return new Vec2().centerOf(...this.getPoints());
   }
-  getRect (): PathRect {
+  getRect(): PathRect {
     let points: Array<Vec2>;
     let result = {
       top: -Infinity,
@@ -211,7 +244,33 @@ export class PathHelper {
     }
     return result;
   }
-  applyTransform (t: Transform2d): this {
+  convertCoordinates(absolute: boolean): this {
+    if (!absolute) throw `Relative conversion not supported yet`;
+
+    let currentPoint = new Vec2();
+    for (let cmd of this.commands) {
+      //If relative
+      if (!cmd.isAbsolute()) {
+        //convert the coordinates
+        for (let p of cmd.getPoints()) {
+          p.add(currentPoint);
+        }
+        //Set type to be absolute version
+        cmd.setType(cmd.getType().toUpperCase());
+      }
+
+      if (cmd.isAbsolute()) {
+        currentPoint.copy(cmd.getGeneratedOffset());
+      } else {
+        currentPoint.add(cmd.getGeneratedOffset());
+      }
+    }
+
+    return this;
+  }
+  applyTransform(t: Transform2d): this {
+    this.convertCoordinates(true);
+
     let ctrls = this.getPoints();
 
     let sinR = Math.sin(t.rotation);
@@ -221,12 +280,12 @@ export class PathHelper {
 
     for (let p of ctrls) {
       p.mulScalar(t.scale);
-      
+
       p.set(
         p.x * cosR - p.y * sinR,
         p.y * cosR + p.x * sinR
       );
-      p.add (t.position);
+      p.add(t.position);
     }
     return this;
   }
