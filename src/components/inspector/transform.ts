@@ -15,6 +15,7 @@ export class TransformEditor extends InspectorEditor {
   private fieldR: EditorField;
   private fieldS: EditorField;
   private btnBake: EditorAction;
+  private btnTransformToCenter: EditorAction;
 
   constructor (inspector: Inspector) {
     super(inspector);
@@ -34,35 +35,55 @@ export class TransformEditor extends InspectorEditor {
     this.addItem(this.fieldS);
 
     this.btnBake = new EditorAction(this).setLabel("Bake Transforms").listen(()=>{
-      this.transform.position.setX(
-        parseFloat(this.fieldX.getValue())
-      );
-      this.transform.position.setY(
-        parseFloat(this.fieldY.getValue())
-      );
-      this.transform.rotation = parseFloat(this.fieldR.getValue());
-      this.transform.scale = parseFloat(this.fieldS.getValue());
-
+      this.displayToInternal();
+      
       let dOld = this.content.getAttribute("d");
 
       let path = PathHelper.from(this.content.getAttribute("d"));
       path.applyTransform(this.transform);
 
-      let dNew = path.to().toLowerCase();
+      let dNew = path.to();
 
       console.log("Old:", dOld);
       console.log("New:", dNew);
 
       this.content.setAttribute("d", dNew);
-
-      this.transform.position.set(0, 0);
-      this.transform.rotation = 0;
-      this.transform.scale = 1;
+      this.internalToDisplay();
+      
       this.notifyContentModified(this, this.content);
     });
     this.addItem(this.btnBake);
 
+    this.btnTransformToCenter = new EditorAction(this).setLabel("Transform To Center").listen(()=>{
+      let path = PathHelper.from(this.content.getAttribute("d"));
+      this.transform.position.copy(path.averagePoint()).mulScalar(-1);
+      
+      path.applyTransform(this.transform);
+
+      this.transform.position.mulScalar(-1);
+      
+      this.content.setAttribute("d", path.to());
+
+      this.content.setAttribute("transform", this.transformToString());
+
+      this.internalToDisplay();
+      this.notifyContentModified(this, this.content);
+    });
+    this.addItem(this.btnTransformToCenter);
+
     this.build();
+  }
+  private internalToDisplay () {
+    this.fieldX.setValue(this.transform.position.x);
+    this.fieldY.setValue(this.transform.position.y);
+    this.fieldR.setValue(this.transform.rotation);
+    this.fieldS.setValue(this.transform.scale);
+  }
+  private displayToInternal () {
+    this.transform.position.x = parseFloat(this.fieldX.getValue());
+    this.transform.position.y = parseFloat(this.fieldY.getValue());
+    this.transform.rotation = parseFloat(this.fieldR.getValue());
+    this.transform.scale = parseFloat(this.fieldS.getValue());
   }
   onSwitchContent (): this {
     return this;

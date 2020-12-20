@@ -1,6 +1,6 @@
 import { Transform2d, Vec2 } from "@repcomm/scenario2d";
 
-export const SVGPathDCommands = "MLQTCSAZVH";
+export const SVGPathDCommands = "MLQTCSAZVHmlqtcsazvh";
 
 export interface PathRect {
   top: number;
@@ -50,6 +50,13 @@ export class PathCmd {
     }
     return result;
   }
+  /**Returns true if the coordinates are in absolute space
+   * false if relative space
+   * Relies on svg path d lowercase / uppercase syntax
+   */
+  isAbsolute (): boolean {
+    return this.type === this.type.toLowerCase();
+  }
 }
 
 /**A helper class for SVG paths modification / info
@@ -65,8 +72,7 @@ export class PathHelper {
    * @param d 
    */
   static from(d: string): PathHelper {
-    let dUpper = d.toUpperCase();
-    let chunks: Array<string> = dUpper.split(" ");
+    let chunks: Array<string> = d.split(" ");
     let args: Array<string>;
 
     let result = new PathHelper();
@@ -134,6 +140,36 @@ export class PathHelper {
     }
     return result;
   }
+  /**Gets the points declared with lowercase path d commands
+   */
+  getRelativePoints (clone: boolean = false): Array<Vec2> {
+    let result = new Array<Vec2>();
+    for (let cmd of this.commands) {
+      if (cmd.isAbsolute()) continue;
+      if (clone) {
+        for (let p of cmd.getPoints()) {
+          result.push(new Vec2().copy(p));
+        }
+      } else {
+        result.push(...cmd.getPoints());
+      }
+    }
+    return result;
+  }
+  getAbsolutePoints (clone: boolean = false): Array<Vec2> {
+    let result = new Array<Vec2>();
+    for (let cmd of this.commands) {
+      if (!cmd.isAbsolute()) continue;
+      if (clone) {
+        for (let p of cmd.getPoints()) {
+          result.push(new Vec2().copy(p));
+        }
+      } else {
+        result.push(...cmd.getPoints());
+      }
+    }
+    return result;
+  }
   /**Encodes the path to a d attribute formatted string*/
   to(): string {
     let result = "";
@@ -181,13 +217,15 @@ export class PathHelper {
     let sinR = Math.sin(t.rotation);
     let cosR = Math.cos(t.rotation);
 
+    //TODO - handle relative points (possibly just convert them all to absolute?)
+
     for (let p of ctrls) {
       p.mulScalar(t.scale);
       
-      // p.set(
-      //   p.x * cosR - p.y * sinR,
-      //   p.y * cosR + p.x * sinR
-      // );
+      p.set(
+        p.x * cosR - p.y * sinR,
+        p.y * cosR + p.x * sinR
+      );
       p.add (t.position);
     }
     return this;

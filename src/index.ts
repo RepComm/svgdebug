@@ -42,7 +42,7 @@ function loadSVG (url: string): Promise<XMLDocument> {
 }
 
 async function init () {
-  let doc = await loadSVG("./res/penguin.svg");
+  let doc = await loadSVG("./res/box.svg");
   console.log(doc);
   editor.setDocument(doc);
 }
